@@ -1,0 +1,64 @@
+.TH BOOGIEWOOGIE 1 "May 2024" "BoogieWoogie 1.0.0" "User Commands"
+.SH NAME
+boogiewoogie \- Git profile manager for switching between multiple Git identities
+.SH SYNOPSIS
+.B boogiewoogie
+[\fICOMMAND\fR] [\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B boogiewoogie
+is a command-line tool that helps manage multiple Git profiles with their corresponding SSH keys.
+It's particularly useful for developers who need to switch between different Git accounts (personal, work, etc.).
+.SH COMMANDS
+.TP
+.BR add
+Add a new Git profile interactively
+.TP
+.BR list
+List all configured profiles
+.TP
+.BR switch " " \fIPROFILE\fR
+Switch to a specific profile
+.TP
+.BR remove " " \fIPROFILE\fR
+Remove a profile
+.TP
+.BR current
+Show current profile information
+.TP
+.BR version
+Show version information
+.TP
+.BR help
+Show help message
+.SH FILES
+.TP
+.I ~/.boogiewoogie/profiles.conf
+Stores profile configurations
+.TP
+.I ~/.ssh/config
+SSH configuration file managed by boogiewoogie
+.SH ENVIRONMENT
+.TP
+.B HOME
+Used to locate configuration files
+.SH EXAMPLES
+.TP
+Add a new profile:
+.B boogiewoogie add
+.TP
+Switch to a profile:
+.B boogiewoogie switch personal
+.TP
+List all profiles:
+.B boogiewoogie list
+.SH AUTHOR
+Written by BoogieWoogie Contributors
+.SH BUGS
+Report bugs at https://github.com/YOUR_USERNAME/boogiewoogie/issues
+.SH COPYRIGHT
+Copyright \(co 2024 BoogieWoogie Contributors
+License MIT: <https://opensource.org/licenses/MIT>
+.SH SEE ALSO
+.BR git (1),
+.BR ssh-keygen (1),
+.BR ssh-add (1) 

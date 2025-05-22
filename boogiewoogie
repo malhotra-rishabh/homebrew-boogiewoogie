@@ -238,6 +238,100 @@ function show_current() {
     echo "(This configuration doesn't match any saved profile)"
 }
 
+function _generate_completions() {
+    case "$1" in
+        "bash")
+            cat <<EOF
+_boogiewoogie_completions()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="\${COMP_WORDS[COMP_CWORD]}"
+    prev="\${COMP_WORDS[COMP_CWORD-1]}"
+    opts="add list switch remove current version help"
+
+    case "\${prev}" in
+        switch|remove)
+            local profiles=\$(grep -o '^[^:]*' "$CONFIG_FILE" 2>/dev/null)
+            COMPREPLY=( \$(compgen -W "\${profiles}" -- \${cur}) )
+            return 0
+            ;;
+        *)
+            COMPREPLY=( \$(compgen -W "\${opts}" -- \${cur}) )
+            return 0
+            ;;
+    esac
+}
+complete -F _boogiewoogie_completions boogiewoogie
+EOF
+            ;;
+        "zsh")
+            cat <<EOF
+#compdef boogiewoogie
+
+_boogiewoogie() {
+    local -a commands
+    commands=(
+        'add:Add a new Git profile'
+        'list:List all profiles'
+        'switch:Switch to a specific profile'
+        'remove:Remove a profile'
+        'current:Show current profile'
+        'version:Show version information'
+        'help:Show help message'
+    )
+
+    _arguments -C \\
+        '1: :->command' \\
+        '*:: :->args'
+
+    case \$state in
+        command)
+            _describe -t commands 'boogiewoogie commands' commands
+            ;;
+        args)
+            case \$words[1] in
+                switch|remove)
+                    local -a profiles
+                    profiles=(\$(grep -o '^[^:]*' "$CONFIG_FILE" 2>/dev/null))
+                    _describe -t profiles 'profiles' profiles
+                    ;;
+            esac
+            ;;
+    esac
+}
+
+_boogiewoogie
+EOF
+            ;;
+        "fish")
+            cat <<EOF
+complete -c boogiewoogie -f
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "add" -d "Add a new Git profile"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "list" -d "List all profiles"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "switch" -d "Switch to a specific profile"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "remove" -d "Remove a profile"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "current" -d "Show current profile"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "version" -d "Show version information"
+complete -c boogiewoogie -n "__fish_use_subcommand" -a "help" -d "Show help message"
+
+function __boogiewoogie_profiles
+    grep -o '^[^:]*' "$HOME/.boogiewoogie/profiles.conf" 2>/dev/null
+end
+
+complete -c boogiewoogie -n '__fish_seen_subcommand_from switch remove' -a "(__boogiewoogie_profiles)"
+EOF
+            ;;
+    esac
+}
+
+# Handle completion generation
+if [ "$1" = "completion" ]; then
+    shell="${2:-bash}"
+    _generate_completions "$shell"
+    exit 0
+fi
+
 # Main command processing
 case "$1" in
     "add")
