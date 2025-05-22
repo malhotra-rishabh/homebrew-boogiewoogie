@@ -21,7 +21,7 @@ A powerful command-line tool to manage multiple Git profiles with their correspo
 ### Using Homebrew
 
 ```bash
-brew tap YOUR_USERNAME/boogiewoogie
+brew tap malhotra-rishabh/boogiewoogie
 brew install boogiewoogie
 ```
 
@@ -29,7 +29,7 @@ brew install boogiewoogie
 
 1. Download the script:
    ```bash
-   curl -o ~/boogiewoogie https://raw.githubusercontent.com/YOUR_USERNAME/boogiewoogie/main/boogiewoogie
+   curl -o ~/boogiewoogie https://raw.githubusercontent.com/malhotra-rishabh/boogiewoogie/main/boogiewoogie
    ```
 
 2. Make it executable:
