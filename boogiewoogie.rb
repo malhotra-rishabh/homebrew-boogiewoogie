@@ -2,7 +2,7 @@ class Boogiewoogie < Formula
   desc "Git profile manager for switching between multiple Git identities"
   homepage "https://github.com/malhotra-rishabh/boogiewoogie"
   url "https://github.com/malhotra-rishabh/boogiewoogie/archive/refs/tags/v1.0.0.tar.gz"
-  sha256 "REPLACE_WITH_ACTUAL_SHA256"
+  sha256 "738dd0169ceff78bd564b4853e4f9afd5a2bd55bec2ef8b5aeefc8b91e600888  boogiewoogie-1.tar.gz"
   license "MIT"
   head "https://github.com/malhotra-rishabh/boogiewoogie.git", branch: "main"
 
