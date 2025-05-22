@@ -44,7 +44,7 @@ function add_profile() {
     read -p "Enter Git user name: " git_name
     read -p "Enter Git email: " git_email
     read -p "Enter Git host (e.g., github.com): " git_host
-    read -p "Enter SSH key path (default: $HOME/.ssh/id_ed25519_${profile_name}): " ssh_key
+    read -p "Enter SSH key path (default: $HOME/.ssh/id_ed25519_${profile_name}) (Optional): " ssh_key
     
     # Set default SSH key path if none provided
     ssh_key=${ssh_key:-"$HOME/.ssh/id_ed25519_${profile_name}"}
