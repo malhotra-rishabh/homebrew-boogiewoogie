@@ -119,11 +119,12 @@ function switch_profile() {
     IFS=: read -r name full_name email host key <<< "$profile_line"
     
     # Check if SSH key exists
-    if [ ! -f "$key" ]; then
-        echo "Error: SSH key not found: $key"
-        echo "Run '$(basename "$0") add' to create a new profile with SSH key"
-        exit 1
-    fi
+    # Commenting this right now, since its giving error. Still figuring out how to handle this
+    # if [ ! -f "$key" ]; then
+    #     echo "Error: SSH key not found: $key"
+    #     echo "Run '$(basename "$0") add' to create a new profile with SSH key"
+    #     exit 1
+    # fi
     
     # Update Git config
     git config --global user.name "$full_name"
