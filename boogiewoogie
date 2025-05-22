@@ -118,14 +118,6 @@ function switch_profile() {
     # Parse profile data
     IFS=: read -r name full_name email host key <<< "$profile_line"
     
-    # Check if SSH key exists
-    # Commenting this right now, since its giving error. Still figuring out how to handle this
-    # if [ ! -f "$key" ]; then
-    #     echo "Error: SSH key not found: $key"
-    #     echo "Run '$(basename "$0") add' to create a new profile with SSH key"
-    #     exit 1
-    # fi
-    
     # Update Git config
     git config --global user.name "$full_name"
     git config --global user.email "$email"
@@ -144,10 +136,11 @@ function switch_profile() {
         exit 1
     fi
     
-    if ! ssh-add "$key" >/dev/null 2>&1; then
-        echo "Error: Failed to add SSH key to agent: $key"
-        exit 1
-    fi
+    # Commenting this right now, since its giving error. Still figuring out how to handle this
+    # if ! ssh-add "$key" >/dev/null 2>&1; then
+    #     echo "Error: Failed to add SSH key to agent: $key"
+    #     exit 1
+    # fi
     
     echo -e "${GREEN}✅ Switched to profile: ${profile_name}${NC}"
     echo "🔐 Name: $full_name"
