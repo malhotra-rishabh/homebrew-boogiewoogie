@@ -136,20 +136,18 @@ function switch_profile() {
         exit 1
     fi
     
-    # Commenting this right now, since its giving error. Still figuring out how to handle this
-    # if ! ssh-add "$key" >/dev/null 2>&1; then
-    #     echo "Error: Failed to add SSH key to agent: $key"
-    #     exit 1
-    # fi
+    # Verify the values were set correctly
+    current_name=$(git config --global user.name)
+    current_email=$(git config --global user.email)
     
     echo -e "${GREEN}✅ Switched to profile: ${profile_name}${NC}"
-    echo "🔐 Name: $full_name"
-    echo "📧 Email: $email"
-    echo "🔑 SSH Key: $key"
+    echo "🔐 Name: ${current_name}"
+    echo "📧 Email: ${current_email}"
     
     # Verify Git host connection
     echo -e "\nTesting connection to $host..."
     if ! ssh -T "git@$host" 2>&1 | grep -q "success"; then
+        echo "${GREEN}✅ Successfully connected to $host${NC}"
         echo -e "${BLUE}Note: If this is your first time connecting to $host, you may need to verify the host key${NC}"
     fi
 }
