@@ -30,7 +30,7 @@ class Boogiewoogie < Formula
   end
 
   test do
-    system "#{bin}/boogiewoogie", "--version "
+    system "#{bin}/boogiewoogie", "--version"
     
     # Test profile creation
     ENV["HOME"] = testpath
