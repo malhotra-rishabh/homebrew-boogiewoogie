@@ -3,50 +3,47 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          fetch-depth: 0
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
 
-      - name: Set up Ruby (for Homebrew formula)
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.1'
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
 
-      - name: Get tag name
-        id: get_tag
+      - name: Calculate SHA256
+        id: shasum
         run: |
-          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-
-      - name: Build tarball
-        run: |
-          tar -czvf boogiewoogie-${{ steps.get_tag.outputs.tag }}.tar.gz boogiewoogie docs/boogiewoogie.1 README.md LICENSE boogiewoogie.rb
+          curl -L "https://github.com/${{ github.repository }}/archive/refs/tags/${{ github.ref_name }}.tar.gz" | shasum -a 256 | cut -d ' ' -f 1 > sha256.txt
+          echo "SHA256=$(cat sha256.txt)" >> $GITHUB_ENV
 
       - name: Update Homebrew Formula
         run: |
-          bash .github/scripts/update_formula.sh ${{ steps.get_tag.outputs.tag }}
+          sed -i "s|url.*|url \"https://github.com/${{ github.repository }}/archive/refs/tags/${{ github.ref_name }}.tar.gz\"|" boogiewoogie.rb
+          sed -i "s|sha256.*|sha256 \"${{ env.SHA256 }}\"|" boogiewoogie.rb
+          sed -i "s|version.*|version \"${{ env.VERSION }}\"|" boogiewoogie.rb
 
-      - name: Create or Update Release and Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.get_tag.outputs.tag }}
-          name: Release ${{ steps.get_tag.outputs.tag }}
-          files: |
-            boogiewoogie-${{ steps.get_tag.outputs.tag }}.tar.gz
-            boogiewoogie.rb
-          draft: false
-          prerelease: false
-          update_release: true
+      - name: Commit and Push Formula Update
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+          git add boogiewoogie.rb
+          git commit -m "chore: update formula for version ${{ env.VERSION }}"
+          git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-# Notes:
-# - This workflow triggers only on tag pushes (v*), ensuring a tag is always present for releases.
-# - The release and asset upload steps use the tag from the workflow context.
-# - Formula update is local to the repo and included as a release asset.
