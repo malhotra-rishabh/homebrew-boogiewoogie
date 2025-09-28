@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   release:
@@ -12,49 +12,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Needed to push tags
+          fetch-depth: 0
 
       - name: Set up Ruby (for Homebrew formula)
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.1'
 
-      - name: Extract version from boogiewoogie.rb
-        id: get_version
+      - name: Get tag name
+        id: get_tag
         run: |
-          version=$(grep 'version ' boogiewoogie.rb | awk '{print $2}' | tr -d '"')
-          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: Create tag if not exists
-        id: create_tag
+      - name: Build tarball
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
-            echo "Tag v${{ steps.get_version.outputs.version }} already exists."
-          else
-            git tag "v${{ steps.get_version.outputs.version }}"
-            git push origin "v${{ steps.get_version.outputs.version }}"
-          fi
+          tar -czvf boogiewoogie-${{ steps.get_tag.outputs.tag }}.tar.gz boogiewoogie docs/boogiewoogie.1 README.md LICENSE boogiewoogie.rb
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.get_version.outputs.version }}
-          name: Release v${{ steps.get_version.outputs.version }}
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: Release ${{ steps.get_tag.outputs.tag }}
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build tarball
-        run: |
-          tar -czvf boogiewoogie-v${{ steps.get_version.outputs.version }}.tar.gz boogiewoogie docs/boogiewoogie.1 README.md LICENSE boogiewoogie.rb
-
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: boogiewoogie-v${{ steps.get_version.outputs.version }}.tar.gz
+          files: boogiewoogie-${{ steps.get_tag.outputs.tag }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -66,6 +53,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 # Notes:
-# - This workflow now automatically creates a tag based on the version in boogiewoogie.rb if it doesn't exist.
-# - It then creates a release and uploads the tarball and formula.
-# - Make sure to update your version and sha256 in boogiewoogie.rb before pushing to main.
+# - This workflow now triggers only on tag pushes (v*), ensuring a tag is always present for releases.
+# - The release and asset upload steps use the tag from the workflow context.
