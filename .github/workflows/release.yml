@@ -54,6 +54,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Update Homebrew Formula
+        run: |
+          bash .github/scripts/update_formula.sh ${{ steps.get_tag.outputs.tag }}
+
+      - name: Commit and push updated formula
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add boogiewoogie.rb
+          git commit -m "Update formula for ${{ steps.get_tag.outputs.tag }} [ci skip]" || echo "No changes to commit"
+          git push origin HEAD:main
+
 # Notes:
 # - This workflow now triggers only on tag pushes (v*), ensuring a tag is always present for releases.
 # - The release and asset upload steps use the tag from the workflow context.
