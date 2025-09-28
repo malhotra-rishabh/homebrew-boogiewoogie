@@ -1,11 +1,11 @@
 class Boogiewoogie < Formula
   desc "Git profile manager for switching between multiple Git identities"
   homepage "https://github.com/malhotra-rishabh/boogiewoogie"
-  url "https://github.com/malhotra-rishabh/boogiewoogie/archive/refs/tags/v1.0.10.tar.gz" # always remember to change this while updating version
-  sha256 "b6ce30d664f29d6a2e6c37c836542a3a7e2fc5c4"
+  url "https://github.com/malhotra-rishabh/boogiewoogie/archive/refs/tags/v1.0.11.tar.gz" # always remember to change this while updating version
+  sha256 "702c3296cefed4b38ca43398697ec24de066bc4c"
   license "MIT"
   head "https://github.com/malhotra-rishabh/boogiewoogie.git", branch: "main"
-  version "1.0.10"
+  version "1.0.11"
 
   livecheck do
     url :stable
