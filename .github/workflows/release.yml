@@ -58,6 +58,9 @@ jobs:
         run: |
           bash .github/scripts/update_formula.sh ${{ steps.get_tag.outputs.tag }}
 
+      - name: Pull latest changes from main
+        run: git pull --rebase origin main
+
       - name: Commit and push updated formula
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
