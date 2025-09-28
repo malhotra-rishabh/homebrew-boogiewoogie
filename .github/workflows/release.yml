@@ -42,6 +42,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: boogiewoogie-${{ steps.get_tag.outputs.tag }}.tar.gz
+          update_release: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -49,6 +50,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: boogiewoogie.rb
+          update_release: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
