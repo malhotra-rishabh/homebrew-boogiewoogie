@@ -16,10 +16,10 @@ NC='\033[0m' # No Color
 
 function show_help() {
     echo "BoogieWoogie - Git Profile Manager v${VERSION}"
-    echo "Manage multiple Git profiles with SSH keys"
+    echo "Manage multiple Git profiles with SSH keys and SSH host aliases"
     echo
     echo "Usage:"
-    echo "  $(basename "$0") add                     - Add a new Git profile"
+    echo "  $(basename "$0") add                     - Add a new Git profile (with SSH alias)"
     echo "  $(basename "$0") list                    - List all profiles"
     echo "  $(basename "$0") switch <profile-name>   - Switch to a specific profile"
     echo "  $(basename "$0") remove <profile-name>   - Remove a profile"
@@ -27,6 +27,9 @@ function show_help() {
     echo "  $(basename "$0") version                 - Show version information"
     echo "  $(basename "$0") help                    - Show this help message"
     echo
+    echo "When using multiple profiles for the same host (e.g., github.com), use the SSH alias in your Git remote URLs:"
+    echo "  git@<host-alias>:username/repo.git"
+    echo "Example: git@github-work:username/repo.git"
     exit 0
 }
 
@@ -44,27 +47,37 @@ function add_profile() {
     read -p "Enter Git user name: " git_name
     read -p "Enter Git email: " git_email
     read -p "Enter Git host (e.g., github.com): " git_host
+    read -p "Enter SSH host alias (e.g., github-${profile_name}) (default: ${git_host}-${profile_name}): " host_alias
     read -p "Enter SSH key path (default: $HOME/.ssh/id_ed25519_${profile_name}) (Optional): " ssh_key
-    
+
     # Set default SSH key path if none provided
     ssh_key=${ssh_key:-"$HOME/.ssh/id_ed25519_${profile_name}"}
-    
+    # Set default host alias if none provided
+    host_alias=${host_alias:-"${git_host}-${profile_name}"}
+
     # Check if profile already exists
     if grep -q "^${profile_name}:" "$CONFIG_FILE"; then
         echo "Error: Profile '${profile_name}' already exists!"
         exit 1
     fi
-    
-    # Save profile
-    echo "${profile_name}:${git_name}:${git_email}:${git_host}:${ssh_key}" >> "$CONFIG_FILE"
-    
+
+    # Check if host alias already exists
+    if grep -q ":${host_alias}$" "$CONFIG_FILE"; then
+        echo "Error: SSH host alias '${host_alias}' is already used by another profile!"
+        exit 1
+    fi
+
+    # Save profile (now includes host_alias)
+    echo "${profile_name}:${git_name}:${git_email}:${git_host}:${ssh_key}:${host_alias}" >> "$CONFIG_FILE"
+
     # Create alias suggestion
     alias_cmd="alias git-${profile_name}='boogiewoogie switch ${profile_name}'"
-    
+
     echo -e "\n${GREEN}Profile '${profile_name}' added successfully!${NC}"
     echo -e "${BLUE}Add this to your ~/.bashrc or ~/.zshrc to create an alias:${NC}"
     echo "$alias_cmd"
-    
+    echo -e "${BLUE}When cloning or setting remotes, use: git@${host_alias}:username/repo.git${NC}"
+
     # Offer to generate SSH key if it doesn't exist
     if [ ! -f "$ssh_key" ]; then
         read -p "SSH key doesn't exist. Would you like to generate it now? (y/n): " generate_key
@@ -87,12 +100,12 @@ function list_profiles() {
     current_name=$(git config --global user.name)
     current_email=$(git config --global user.email)
     
-    while IFS=: read -r name full_name email host key; do
+    while IFS=: read -r name full_name email host key host_alias; do
         if [ -n "$name" ]; then
             if [ "$full_name" = "$current_name" ] && [ "$email" = "$current_email" ]; then
-                echo -e "${GREEN}* ${name}${NC} (${full_name} <${email}>) - ${host}"
+                echo -e "${GREEN}* ${name}${NC} (${full_name} <${email}>) - ${host} [alias: ${host_alias}]"
             else
-                echo "  ${name} (${full_name} <${email}>) - ${host}"
+                echo "  ${name} (${full_name} <${email}>) - ${host} [alias: ${host_alias}]"
             fi
         fi
     done < "$CONFIG_FILE"
@@ -109,45 +122,46 @@ function switch_profile() {
     
     # Find profile in config
     profile_line=$(grep "^${profile_name}:" "$CONFIG_FILE")
-    
+
     if [ -z "$profile_line" ]; then
         echo "Error: Profile '${profile_name}' not found!"
         exit 1
     fi
-    
+
     # Parse profile data
-    IFS=: read -r name full_name email host key <<< "$profile_line"
-    
+    IFS=: read -r name full_name email host key host_alias <<< "$profile_line"
+
     # Update Git config
     git config --global user.name "$full_name"
     git config --global user.email "$email"
-    
+
     # Update SSH config
     update_ssh_config
-    
+
     # Restart SSH agent with new key
     echo "Updating SSH agent..."
     if ! ssh-add -D >/dev/null 2>&1; then
         echo "Warning: Failed to remove identities from SSH agent"
     fi
-    
+
     if ! eval "$(ssh-agent -s)" >/dev/null 2>&1; then
         echo "Error: Failed to start SSH agent"
         exit 1
     fi
-    
+
     # Verify the values were set correctly
     current_name=$(git config --global user.name)
     current_email=$(git config --global user.email)
-    
+
     echo -e "${GREEN}✅ Switched to profile: ${profile_name}${NC}"
     echo "🔐 Name: ${current_name}"
     echo "📧 Email: ${current_email}"
-    
-    # Verify Git host connection
-    echo -e "\nTesting connection to ${host}..."
-    if ! ssh -T "git@$host" 2>&1 | grep -q "success"; then
-        echo -e "✅ Successfully connected to ${host}${NC}"
+    echo "🌐 SSH Host Alias: ${host_alias} (use in remote URLs)"
+
+    # Verify Git host connection using alias
+    echo -e "\nTesting connection to ${host} via alias ${host_alias}..."
+    if ! ssh -T "git@${host_alias}" 2>&1 | grep -q "success"; then
+        echo -e "✅ Successfully connected to ${host} via ${host_alias}${NC}"
         echo -e "${BLUE}Note: If this is your first time connecting to ${host}, you may need to verify the host key${NC}"
     fi
 }
@@ -185,10 +199,10 @@ function update_ssh_config() {
 EOF
     
     # Add each profile's SSH config
-    while IFS=: read -r name full_name email host key; do
+    while IFS=: read -r name full_name email host key host_alias; do
         if [ -n "$name" ]; then
             cat >> "$SSH_CONFIG_FILE" <<EOF
-Host $host
+Host $host_alias
     HostName $host
     User git
     IdentityFile $key
@@ -236,13 +250,14 @@ function show_current() {
         exit 0
     fi
     
-    while IFS=: read -r name full_name email host key; do
+    while IFS=: read -r name full_name email host key host_alias; do
         if [ "$full_name" = "$current_name" ] && [ "$email" = "$current_email" ]; then
             echo -e "${GREEN}Current profile: ${name}${NC}"
             echo "🔐 Name: $full_name"
             echo "📧 Email: $email"
             echo "🌐 Host: $host"
             echo "🔑 SSH Key: $key"
+            echo "🔗 SSH Host Alias: $host_alias"
             exit 0
         fi
     done < "$CONFIG_FILE"

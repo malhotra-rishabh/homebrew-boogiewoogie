@@ -55,13 +55,29 @@ This will interactively prompt you for:
 - Git user name
 - Git email
 - Git host (e.g., github.com, gitlab.com)
+- **SSH host alias** (e.g., github-personal, github-work; must be unique)
 - SSH key path (optional, defaults to ~/.ssh/id_ed25519_[profile-name])
+
+> **Note:** The SSH host alias must be unique for each profile. If you try to add a profile with an alias that already exists, BoogieWoogie will show an error and prevent the addition.
 
 The script will:
 - Save your profile
 - Offer to generate a new SSH key if it doesn't exist
 - Show the public key for adding to your Git host
 - Suggest an alias for easy switching
+- Show instructions for using the SSH alias in your Git remote URLs
+
+### Using SSH Host Aliases in Git Remotes
+
+When you have multiple profiles for the same host (e.g., github.com), use the SSH alias in your remote URLs. For example:
+
+```bash
+git remote set-url origin git@github-personal:username/repo.git
+# or
+git clone git@github-work:username/repo.git
+```
+
+This ensures the correct SSH key and profile are used for each account.
 
 ### List All Profiles
 
@@ -81,10 +97,10 @@ This will:
 - Verify SSH key existence
 - Update your global Git configuration
 - Create a backup of your existing SSH config
-- Update your SSH configuration
+- Update your SSH configuration (with all SSH aliases)
 - Restart the SSH agent with the correct key
-- Test connection to the Git host
-- Show detailed status information
+- Test connection to the Git host via the alias
+- Show detailed status information, including the SSH alias to use
 
 ### Show Current Profile
 
@@ -132,18 +148,26 @@ alias git-work='boogiewoogie switch work'
    ```bash
    boogiewoogie add
    # Enter details for personal GitHub account
+   # Use SSH alias: github-personal
    ```
 
 2. Add your work profile:
    ```bash
    boogiewoogie add
-   # Enter details for work GitLab account
+   # Enter details for work GitHub account
+   # Use SSH alias: github-work
    ```
 
 3. Switch between profiles as needed:
    ```bash
    boogiewoogie switch personal  # For personal projects
    boogiewoogie switch work      # For work projects
+   ```
+
+4. Update your Git remote URLs to use the correct alias:
+   ```bash
+   git remote set-url origin git@github-personal:username/repo.git
+   git remote set-url origin git@github-work:username/repo.git
    ```
 
 ## Security Features
@@ -160,7 +184,7 @@ alias git-work='boogiewoogie switch work'
 
 If you encounter issues:
 
-1. Check current profile:
+1. Check current profile and SSH alias:
    ```bash
    boogiewoogie current
    ```
@@ -170,10 +194,10 @@ If you encounter issues:
    ssh-add -l
    ```
 
-3. Test SSH connection:
+3. Test SSH connection using the alias:
    ```bash
-   ssh -T git@github.com  # For GitHub
-   ssh -T git@gitlab.com  # For GitLab
+   ssh -T git@github-personal  # For personal GitHub
+   ssh -T git@github-work      # For work GitHub
    ```
 
 4. Check SSH config backups:
@@ -192,4 +216,4 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
