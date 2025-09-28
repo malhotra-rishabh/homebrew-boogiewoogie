@@ -5,7 +5,7 @@ class Boogiewoogie < Formula
   sha256 "523259d152988d4cb0c8b0b8f133a4bc6d6ac41f"
   license "MIT"
   head "https://github.com/malhotra-rishabh/boogiewoogie.git", branch: "main"
-  version "1.0.6"
+  version "1.0.7"
 
   livecheck do
     url :stable
