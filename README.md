@@ -5,6 +5,7 @@ A powerful command-line tool to manage multiple Git profiles with their correspo
 ## Features
 
 - 🔄 Manage multiple Git profiles
+- 🎯 Automatic Git URL rewriting based on active profile
 - 🔑 Automatic SSH key management
 - 🚀 Interactive profile creation
 - 📝 Automatic SSH config generation with backups
@@ -67,17 +68,27 @@ The script will:
 - Suggest an alias for easy switching
 - Show instructions for using the SSH alias in your Git remote URLs
 
-### Using SSH Host Aliases in Git Remotes
+### Automatic Git URL Rewriting
 
-When you have multiple profiles for the same host (e.g., github.com), use the SSH alias in your remote URLs. For example:
+BoogieWoogie now automatically rewrites Git URLs to use the correct SSH host alias based on your active profile. This means you can use standard Git URLs, and they'll be automatically converted to use your profile's SSH alias.
 
+For example, when your work profile is active:
+```bash
+# You can use the standard GitHub URL
+git clone git@github.com:username/repo.git
+
+# BoogieWoogie will automatically rewrite it to use your profile's alias
+# It will internally use: git@github-work:username/repo.git
+```
+
+This automatic rewriting works for all Git operations (clone, push, pull, fetch, etc.) and ensures the correct SSH key is always used for your active profile.
+
+You can also manually use the SSH alias in your remote URLs if needed:
 ```bash
 git remote set-url origin git@github-personal:username/repo.git
 # or
-git clone git@github-work:username/repo.git
+git remote set-url origin git@github-work:username/repo.git
 ```
-
-This ensures the correct SSH key and profile are used for each account.
 
 ### List All Profiles
 
@@ -164,10 +175,13 @@ alias git-work='boogiewoogie switch work'
    boogiewoogie switch work      # For work projects
    ```
 
-4. Update your Git remote URLs to use the correct alias:
+4. Use Git normally with standard URLs - BoogieWoogie will automatically use the correct profile:
    ```bash
-   git remote set-url origin git@github-personal:username/repo.git
-   git remote set-url origin git@github-work:username/repo.git
+   # Clone using standard GitHub URL
+   git clone git@github.com:username/repo.git
+   
+   # The URL will be automatically rewritten to use your active profile's alias
+   # For example: git@github-work:username/repo.git when work profile is active
    ```
 
 ## Security Features
