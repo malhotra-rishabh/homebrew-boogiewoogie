@@ -1,14 +1,14 @@
 class Boogiewoogie < Formula
   desc "Git profile manager for switching between multiple Git identities"
   homepage "https://github.com/malhotra-rishabh/boogiewoogie"
-  url "https://github.com/malhotra-rishabh/homebrew-boogiewoogie/archive/refs/tags/v1.0.17.tar.gz"
-  sha256 "9aae95f8287a5e24a53ec91dbd75d0293e1f3b58742383b5f9e636a25f2730a1"
+  url "https://github.com/malhotra-rishabh/homebrew-boogiewoogie/archive/refs/tags/v1.0.18.tar.gz"
+  sha256 "4764db5950c401d15bf0778311ec6e0a525d35cf69776b37bc187bb526f27ad0"
   license "MIT"
   head "https://github.com/malhotra-rishabh/boogiewoogie.git", branch: "main"
-  version "1.0.17"
+  version "1.0.18"
 
   livecheck do
-    url "https://github.com/malhotra-rishabh/homebrew-boogiewoogie/archive/refs/tags/v1.0.17.tar.gz"
+    url "https://github.com/malhotra-rishabh/homebrew-boogiewoogie/archive/refs/tags/v1.0.18.tar.gz"
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
@@ -30,7 +30,7 @@ class Boogiewoogie < Formula
   end
 
   test do
-    system "#{bin}/boogiewoogie", "--version"
+    system "#{bin}/boogiewoogie", "--version "1.0.18"
     
     # Test profile creation
     ENV["HOME"] = testpath
