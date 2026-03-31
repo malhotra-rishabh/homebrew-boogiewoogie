@@ -12,8 +12,19 @@ class Boogiewoogie < Formula
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
-  uses_from_macos "git"
-  uses_from_macos "openssh"
+  depends_on "git"
+  depends_on "openssh"
+  depends_on "libunistring"
+  depends_on "gettext"
+  depends_on "pcre2"
+  depends_on "ca-certificates"
+  depends_on "openssl@3"
+  depends_on "readline"
+  depends_on "sqlite"
+  depends_on "xz"
+  depends_on "zstd"
+  depends_on "python@3.14"
+  depends_on "ldns"
 
   def install
     bin.install "boogiewoogie"
@@ -30,7 +41,7 @@ class Boogiewoogie < Formula
   end
 
   test do
-    system "#{bin}/boogiewoogie", "--version "1.0.19"
+    system "#{bin}/boogiewoogie", "--version"
     
     # Test profile creation
     ENV["HOME"] = testpath
