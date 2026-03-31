@@ -12,8 +12,8 @@ class Boogiewoogie < Formula
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
-  depends_on "git"
-  depends_on "openssh"
+  uses_from_macos "git"
+  uses_from_macos "openssh"
 
   def install
     bin.install "boogiewoogie"

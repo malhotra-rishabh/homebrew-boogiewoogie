@@ -388,7 +388,7 @@ case "$1" in
     "current")
         show_current
         ;;
-    "version")
+    "version"|"--version")
         show_version
         ;;
     "help"|"--help"|"-h"|"")
