@@ -41,12 +41,12 @@ class Boogiewoogie < Formula
   end
 
   test do
-    system "#{bin}/boogiewoogie", "--version 1.0.20"
-    
+    system "#{bin}/boogiewoogie", "--version"
+
     # Test profile creation
     ENV["HOME"] = testpath
     system "#{bin}/boogiewoogie", "help"
-    
+
     # Check if config directory is created
     assert_predicate testpath/".boogiewoogie", :exist?
   end
